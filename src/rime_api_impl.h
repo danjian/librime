@@ -1069,6 +1069,16 @@ static const char* RimeGetInput(RimeSessionId session_id) {
   return ctx->input().c_str();
 }
 
+inline size_t GetInputConfirmedPos(RimeSessionId session_id) {
+  an<Session> session(Service::instance().GetSession(session_id));
+  if (!session)
+    return 0;
+  Context* ctx = session->context();
+  if (!ctx)
+    return 0;
+  return ctx->composition().GetConfirmedPosition();
+}
+
 RIME_DEPRECATED Bool RimeSetInput(RimeSessionId session_id, const char* input) {
   an<Session> session(Service::instance().GetSession(session_id));
   if (!session)
@@ -1204,6 +1214,7 @@ RIME_API RIME_FLAVORED(RimeApi) * RIME_FLAVORED(rime_get_api)() {
     s_api.config_list_size = &RimeConfigListSize;
     s_api.config_begin_list = &RimeConfigBeginList;
     s_api.get_input = &RimeGetInput;
+    s_api.get_input_confirmed_pos = &GetInputConfirmedPos;
     s_api.get_caret_pos = &RimeGetCaretPos;
     s_api.select_candidate = &RimeSelectCandidate;
     s_api.get_version = &RimeGetVersion;

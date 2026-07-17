@@ -429,6 +429,9 @@ typedef struct RIME_FLAVORED(rime_api_t) {
    */
   const char* (*get_input)(RimeSessionId session_id);
 
+  //  raw input confirmed pos for
+  size_t (*get_input_confirmed_pos)(RimeSessionId session_id);
+
   //! caret position in terms of raw input
   size_t (*get_caret_pos)(RimeSessionId session_id);
 
