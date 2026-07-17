@@ -499,6 +499,10 @@ RIME_DEPRECATED Bool RimeGetSchemaList(RimeSchemaList* output) {
     Schema schema(schema_id);
     x.name = new char[schema.schema_name().length() + 1];
     strcpy(x.name, schema.schema_name().c_str());
+    x.layout = new char[schema.layout().length() + 1];
+    strcpy(x.layout, schema.layout().c_str());
+    x.punctuation = new char[schema.punctuation().length() + 1];
+    strcpy(x.punctuation, schema.punctuation().c_str());
     x.reserved = NULL;
     ++output->size;
   }
@@ -517,6 +521,8 @@ RIME_DEPRECATED void RimeFreeSchemaList(RimeSchemaList* schema_list) {
     for (size_t i = 0; i < schema_list->size; ++i) {
       delete[] schema_list->list[i].schema_id;
       delete[] schema_list->list[i].name;
+      delete[] schema_list->list[i].layout;
+      delete[] schema_list->list[i].punctuation;
     }
     delete[] schema_list->list;
   }

@@ -29,6 +29,12 @@ void Schema::FetchUsefulConfigItems() {
   if (!config_->GetString("schema/name", &schema_name_)) {
     schema_name_ = schema_id_;
   }
+  if (!config_->GetString("schema/layout", &layout_)) {
+    layout_ = "";
+  }
+  if (!config_->GetString("schema/punctuation", &punctuation_)) {
+    punctuation_ = "";
+  }
   config_->GetInt("menu/page_size", &page_size_);
   if (page_size_ < 1) {
     page_size_ = 5;

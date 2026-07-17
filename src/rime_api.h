@@ -200,6 +200,8 @@ typedef struct rime_config_iterator_t {
 typedef struct rime_schema_list_item_t {
   char* schema_id;
   char* name;
+  char* layout;
+  char* punctuation;
   void* reserved;
 } RimeSchemaListItem;
 

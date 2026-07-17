@@ -108,6 +108,8 @@ static Bool rime_levers_get_available_schema_list(
     auto& item(list->list[list->size]);
     item.schema_id = const_cast<char*>(info.schema_id.c_str());
     item.name = const_cast<char*>(info.name.c_str());
+    item.layout = const_cast<char*>(info.layout.c_str());
+    item.punctuation = const_cast<char*>(info.punctuation.c_str());
     item.reserved = const_cast<SchemaInfo*>(&info);
     ++list->size;
   }
@@ -127,6 +129,8 @@ static Bool rime_levers_get_selected_schema_list(RimeSwitcherSettings* settings,
     auto& item(list->list[list->size]);
     item.schema_id = const_cast<char*>(schema_id.c_str());
     item.name = NULL;
+    item.layout = const_cast<char*>("");
+    item.punctuation = const_cast<char*>("");
     item.reserved = NULL;
     ++list->size;
   }

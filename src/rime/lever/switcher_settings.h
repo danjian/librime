@@ -15,6 +15,8 @@ namespace rime {
 struct SchemaInfo {
   string schema_id;
   string name;
+  string layout;
+  string punctuation;
   string version;
   string author;
   string description;

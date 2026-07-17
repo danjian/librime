@@ -74,6 +74,8 @@ void SwitcherSettings::GetAvailableSchemasFromDirectory(const path& dir) {
           continue;
         // details
         config.GetString("schema/version", &info.version);
+        config.GetString("schema/layout", &info.layout);
+        config.GetString("schema/punctuation", &info.punctuation);
         if (auto authors = config.GetList("schema/author")) {
           for (size_t i = 0; i < authors->size(); ++i) {
             auto author = authors->GetValueAt(i);
