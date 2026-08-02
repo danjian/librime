@@ -567,6 +567,10 @@ TableAccessor Table::QueryPhrases(const Code& code) {
 
 // log(0.05) ≈ -3.0
 const double kPenaltyForAmbiguousSyllable = -2.995732274;
+// 限制 kAbbreviation 类型边在单次 Query 中的总迭代次数
+const size_t kAbbreviationIterationLimit = 5120;
+// 限制 kAbbreviation 类型边在单次 Query 中的扩展搜索数
+const size_t kMaxAbbreviationExpand = 2;
 
 bool Table::Query(const SyllableGraph& syll_graph,
                   size_t start_pos,
@@ -577,6 +581,10 @@ bool Table::Query(const SyllableGraph& syll_graph,
   std::queue<pair<size_t, TableQuery>> q;
   TableQuery initial_state(index_);
   q.push({start_pos, initial_state});
+
+  size_t abbreviation_iteration_count = 0;
+  size_t abbreviation_expand_count = 0;
+
   while (!q.empty()) {
     size_t current_pos = q.front().first;
     TableQuery query(q.front().second);
@@ -595,6 +603,11 @@ bool Table::Query(const SyllableGraph& syll_graph,
     for (const auto& spellings : index->second) {
       SyllableId syll_id = spellings.first;
       for (auto props : spellings.second) {
+        if (props->type == kAbbreviation) {
+          if (++abbreviation_iteration_count > kAbbreviationIterationLimit) {
+            continue;
+          }
+        }
         size_t end_pos = props->end_pos;
 
         double penalty = 0.0;
@@ -620,6 +633,12 @@ bool Table::Query(const SyllableGraph& syll_graph,
         if (end_pos < syll_graph.interpreted_length &&
             query.Advance(syll_id, next_credibility, delta_quality_len,
                           current_pos)) {
+          // 限制kAbbreviation的展开
+          if (props->type == kAbbreviation &&
+              abbreviation_expand_count++ > kMaxAbbreviationExpand) {
+            query.Backdate();
+            continue;
+          }
           q.push({end_pos, query});
           query.Backdate();
         }
