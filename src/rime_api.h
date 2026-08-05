@@ -116,12 +116,19 @@ typedef struct rime_traits_t {
   const char* staging_dir;
 } RimeTraits;
 
+typedef struct rime_preedit_syllable_t {
+  char* raw_input;
+  char* spelling;
+} RimePreeditSyllable;
+
 typedef struct {
   int length;
   int cursor_pos;
   int sel_start;
   int sel_end;
   char* preedit;
+  int num_syllables;
+  RimePreeditSyllable* syllables;
 } RimeComposition;
 
 typedef struct rime_candidate_t {

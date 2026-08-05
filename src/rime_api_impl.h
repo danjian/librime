@@ -17,6 +17,9 @@
 #include <rime/setup.h>
 #include <rime/signature.h>
 #include <rime/switches.h>
+#include <rime/gear/translator_commons.h>
+
+#include <boost/algorithm/string.hpp>
 
 using namespace rime;
 
@@ -206,6 +209,48 @@ static void rime_candidate_copy(RimeCandidate* dest, const an<Candidate>& src) {
   dest->reserved = nullptr;
 }
 
+static void rime_fill_preedit_syllables(Context* ctx,
+                                        RimeComposition* composition) {
+  composition->num_syllables = 0;
+  composition->syllables = nullptr;
+  auto& comp = ctx->composition();
+  vector<pair<string, string>> syllables;
+  for (const auto& seg : comp) {
+    auto cand = seg.GetSelectedCandidate();
+    if (!cand) continue;
+    auto genuine = Candidate::GetGenuineCandidate(cand);
+    auto phrase = As<Phrase>(genuine);
+    if (!phrase) continue;
+    auto spans = phrase->spans();
+    size_t span_count = spans.Count();
+    if (span_count == 0) continue;
+    vector<string> preedit_parts;
+    boost::split(preedit_parts, cand->preedit(), boost::is_any_of(" '"));
+    size_t pos = spans.start();
+    for (size_t j = 0; j < span_count; ++j) {
+      size_t next = spans.NextStop(pos);
+      if (next == pos) break;
+      string raw = comp.input().substr(pos, next - pos);
+      string syl = j < preedit_parts.size() ? preedit_parts[j] : "";
+      syllables.emplace_back(raw, syl);
+      pos = next;
+    }
+  }
+  if (syllables.empty()) return;
+  composition->num_syllables = (int)syllables.size();
+  composition->syllables = new RimePreeditSyllable[syllables.size()];
+  for (size_t i = 0; i < syllables.size(); ++i) {
+    composition->syllables[i].raw_input =
+        new char[syllables[i].first.length() + 1];
+    std::strcpy(composition->syllables[i].raw_input,
+                syllables[i].first.c_str());
+    composition->syllables[i].spelling =
+        new char[syllables[i].second.length() + 1];
+    std::strcpy(composition->syllables[i].spelling,
+                syllables[i].second.c_str());
+  }
+}
+
 RIME_DEPRECATED Bool RimeGetContext(RimeSessionId session_id,
                                     RIME_FLAVORED(RimeContext) * context) {
   if (!context || context->data_size <= 0)
@@ -225,6 +270,7 @@ RIME_DEPRECATED Bool RimeGetContext(RimeSessionId session_id,
     context->composition.cursor_pos = preedit.caret_pos;
     context->composition.sel_start = preedit.sel_start;
     context->composition.sel_end = preedit.sel_end;
+    rime_fill_preedit_syllables(ctx, &context->composition);
     if (RIME_STRUCT_HAS_MEMBER(*context, context->commit_text_preview)) {
       string commit_text(ctx->GetCommitText());
       if (!commit_text.empty()) {
@@ -285,6 +331,15 @@ RIME_DEPRECATED Bool RimeGetContext(RimeSessionId session_id,
 RIME_DEPRECATED Bool RimeFreeContext(RIME_FLAVORED(RimeContext) * context) {
   if (!context || context->data_size <= 0)
     return False;
+  if (context->composition.syllables) {
+    for (int i = 0; i < context->composition.num_syllables; ++i) {
+      delete[] context->composition.syllables[i].raw_input;
+      delete[] context->composition.syllables[i].spelling;
+    }
+    delete[] context->composition.syllables;
+    context->composition.num_syllables = 0;
+    context->composition.syllables = nullptr;
+  }
   delete[] context->composition.preedit;
   for (int i = 0; i < context->menu.num_candidates; ++i) {
     delete[] context->menu.candidates[i].text;
