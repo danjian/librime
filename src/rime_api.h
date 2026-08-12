@@ -119,6 +119,9 @@ typedef struct rime_traits_t {
 typedef struct rime_preedit_syllable_t {
   char* raw_input;
   char* spelling;
+  char* text;
+  int text_syllable_start;  // inclusive start index
+  int text_syllable_end;    // inclusive end index
 } RimePreeditSyllable;
 
 typedef struct {

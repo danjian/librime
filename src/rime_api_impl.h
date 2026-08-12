@@ -3,6 +3,8 @@
 
 #include "rime_api.h"
 
+#include <tuple>
+
 #include <rime/common.h>
 #include <rime/composition.h>
 #include <rime/config.h>
@@ -214,40 +216,61 @@ static void rime_fill_preedit_syllables(Context* ctx,
   composition->num_syllables = 0;
   composition->syllables = nullptr;
   auto& comp = ctx->composition();
-  vector<pair<string, string>> syllables;
+  vector<std::tuple<string, string, string>> syllables;
+  vector<std::pair<size_t, size_t>> confirmed_ranges;
   for (const auto& seg : comp) {
     auto cand = seg.GetSelectedCandidate();
-    if (!cand) continue;
+    if (!cand)
+      continue;
     auto genuine = Candidate::GetGenuineCandidate(cand);
     auto phrase = As<Phrase>(genuine);
-    if (!phrase) continue;
+    if (!phrase)
+      continue;
     auto spans = phrase->spans();
     size_t span_count = spans.Count();
-    if (span_count == 0) continue;
+    if (span_count == 0)
+      continue;
     vector<string> preedit_parts;
     boost::split(preedit_parts, cand->preedit(), boost::is_any_of(" '"));
+    bool confirmed = seg.status >= Segment::kSelected;
+    string confirmed_text = confirmed ? cand->text() : "";
+    size_t seg_start_idx = syllables.size();
     size_t pos = spans.start();
     for (size_t j = 0; j < span_count; ++j) {
       size_t next = spans.NextStop(pos);
-      if (next == pos) break;
+      if (next == pos)
+        break;
       string raw = comp.input().substr(pos, next - pos);
       string syl = j < preedit_parts.size() ? preedit_parts[j] : "";
-      syllables.emplace_back(raw, syl);
+      syllables.emplace_back(raw, syl, j == 0 ? confirmed_text : "");
       pos = next;
     }
+    if (confirmed && syllables.size() > seg_start_idx)
+      confirmed_ranges.emplace_back(seg_start_idx, syllables.size() - 1);
   }
-  if (syllables.empty()) return;
+  if (syllables.empty())
+    return;
   composition->num_syllables = (int)syllables.size();
   composition->syllables = new RimePreeditSyllable[syllables.size()];
   for (size_t i = 0; i < syllables.size(); ++i) {
     composition->syllables[i].raw_input =
-        new char[syllables[i].first.length() + 1];
+        new char[std::get<0>(syllables[i]).length() + 1];
     std::strcpy(composition->syllables[i].raw_input,
-                syllables[i].first.c_str());
+                std::get<0>(syllables[i]).c_str());
     composition->syllables[i].spelling =
-        new char[syllables[i].second.length() + 1];
+        new char[std::get<1>(syllables[i]).length() + 1];
     std::strcpy(composition->syllables[i].spelling,
-                syllables[i].second.c_str());
+                std::get<1>(syllables[i]).c_str());
+    composition->syllables[i].text =
+        new char[std::get<2>(syllables[i]).length() + 1];
+    std::strcpy(composition->syllables[i].text,
+                std::get<2>(syllables[i]).c_str());
+    composition->syllables[i].text_syllable_start = -1;
+    composition->syllables[i].text_syllable_end = -1;
+  }
+  for (const auto& range : confirmed_ranges) {
+    composition->syllables[range.first].text_syllable_start = (int)range.first;
+    composition->syllables[range.first].text_syllable_end = (int)range.second;
   }
 }
 
@@ -335,6 +358,7 @@ RIME_DEPRECATED Bool RimeFreeContext(RIME_FLAVORED(RimeContext) * context) {
     for (int i = 0; i < context->composition.num_syllables; ++i) {
       delete[] context->composition.syllables[i].raw_input;
       delete[] context->composition.syllables[i].spelling;
+      delete[] context->composition.syllables[i].text;
     }
     delete[] context->composition.syllables;
     context->composition.num_syllables = 0;
