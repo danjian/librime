@@ -29,13 +29,18 @@ bool Segment::Reopen(size_t caret_pos) {
   }
   const size_t original_end_pos = start + length;
   if (original_end_pos == caret_pos) {
-    // reuse previous candidates and keep selection
-    if (end < original_end_pos) {
+    const bool was_partial = HasTag(kPartialSelectionTag);
+    if (was_partial) {
       // restore partial-selected segment
       end = original_end_pos;
       tags.erase(kPartialSelectionTag);
+      status = kVoid;
+      menu.reset();
+      selected_index = 0;
+    } else {
+      // reuse previous candidates and keep selection
+      status = kGuess;
     }
-    status = kGuess;
   } else {
     status = kVoid;
   }
