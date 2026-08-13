@@ -338,11 +338,15 @@ RIME_DEPRECATED Bool RimeGetContext(RimeSessionId session_id,
             config->GetList("menu/alternative_select_labels");
         if (select_labels && (size_t)page_size <= select_labels->size()) {
           context->select_labels = new char*[page_size];
-          for (size_t i = 0; i < (size_t)page_size; ++i) {
-            an<ConfigValue> value = select_labels->GetValueAt(i);
+          for (size_t select_label_index = 0;
+               select_label_index < (size_t)page_size; ++select_label_index) {
+            an<ConfigValue> value =
+                select_labels->GetValueAt(select_label_index);
             string label = value->str();
-            context->select_labels[i] = new char[label.length() + 1];
-            std::strcpy(context->select_labels[i], label.c_str());
+            context->select_labels[select_label_index] =
+                new char[label.length() + 1];
+            std::strcpy(context->select_labels[select_label_index],
+                        label.c_str());
           }
         }
       }
