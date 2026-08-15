@@ -199,6 +199,8 @@ RIME_DEPRECATED Bool RimeSimulateKeySequence(RimeSessionId session_id,
                                              const char* key_sequence);
 
 RIME_DEPRECATED Bool RimeSetInput(RimeSessionId session_id, const char* input);
+RIME_DEPRECATED Bool RimeAppendInput(RimeSessionId session_id,
+                                     const char* input);
 
 //! Run a registered task
 RIME_DEPRECATED Bool RimeRunTask(const char* task_name);

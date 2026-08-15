@@ -536,6 +536,9 @@ typedef struct RIME_FLAVORED(rime_api_t) {
                                 RimeCandidatePreview* preview);
   //! free a RimeCandidatePreview filled by get_candidate_preview
   Bool (*free_candidate_preview)(RimeCandidatePreview* preview);
+
+  //! append input without replacing the current input.
+  Bool (*append_input)(RimeSessionId session_id, const char* input);
 } RIME_FLAVORED(RimeApi);
 
 //! API entry
