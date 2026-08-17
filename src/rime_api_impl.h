@@ -253,13 +253,12 @@ static void rime_fill_preedit_syllables(Context* ctx,
     boost::split(preedit_parts, cand->preedit(), boost::is_any_of(" '"));
     bool confirmed = seg.status >= Segment::kSelected;
     string confirmed_text = confirmed ? cand->text() : "";
-    size_t pos = spans.start();
+    const auto& vertices = spans.vertices();
+    size_t pos = vertices.front();
     append_unsegmented(seg.start, pos);
     size_t seg_start_idx = syllables.size();
     for (size_t j = 0; j < span_count; ++j) {
-      size_t next = spans.NextStop(pos);
-      if (next == pos)
-        break;
+      size_t next = vertices[j + 1];
       string raw = comp.input().substr(pos, next - pos);
       string syl = j < preedit_parts.size() ? preedit_parts[j] : "";
       syllables.emplace_back(raw, syl, j == 0 ? confirmed_text : "");
