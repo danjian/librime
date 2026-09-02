@@ -12,6 +12,14 @@
 
 namespace rime {
 
+struct SchemaOptionInfo {
+  string name;
+  string key;
+  vector<string> keys;
+  bool lock = false;
+  bool value = false;
+};
+
 class Schema {
  public:
   Schema();
@@ -32,8 +40,12 @@ class Schema {
   const string& select_keys() const { return select_keys_; }
   void set_select_keys(const string& keys) { select_keys_ = keys; }
 
+  // custom options defined in the top-level `options` section of the schema
+  const vector<SchemaOptionInfo>& options() const { return options_; }
+
  private:
   void FetchUsefulConfigItems();
+  void FetchOptions();
 
   string schema_id_;
   string schema_name_;
@@ -44,6 +56,8 @@ class Schema {
   int page_size_ = 5;
   bool page_down_cycle_ = false;
   string select_keys_;
+  // custom options defined in the schema
+  vector<SchemaOptionInfo> options_;
 };
 
 class SchemaComponent : public Config::Component {
