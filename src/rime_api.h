@@ -137,6 +137,7 @@ typedef struct {
 typedef struct rime_candidate_t {
   char* text;
   char* comment;
+  char* type;
   void* reserved;
 } RimeCandidate;
 

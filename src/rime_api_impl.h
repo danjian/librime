@@ -208,6 +208,13 @@ static void rime_candidate_copy(RimeCandidate* dest, const an<Candidate>& src) {
   } else {
     dest->comment = nullptr;
   }
+  string type(src->type());
+  if (!type.empty()) {
+    dest->type = new char[type.length() + 1];
+    std::strcpy(dest->type, type.c_str());
+  } else {
+    dest->type = nullptr;
+  }
   dest->reserved = nullptr;
 }
 
@@ -395,6 +402,7 @@ RIME_DEPRECATED Bool RimeFreeContext(RIME_FLAVORED(RimeContext) * context) {
   for (int i = 0; i < context->menu.num_candidates; ++i) {
     delete[] context->menu.candidates[i].text;
     delete[] context->menu.candidates[i].comment;
+    delete[] context->menu.candidates[i].type;
   }
   delete[] context->menu.candidates;
   delete[] context->menu.select_keys;
@@ -510,6 +518,7 @@ RimeCandidateListNext(RimeCandidateListIterator* iterator) {
   if (auto cand = menu->GetCandidateAt((size_t)iterator->index)) {
     delete[] iterator->candidate.text;
     delete[] iterator->candidate.comment;
+    delete[] iterator->candidate.type;
     rime_candidate_copy(&iterator->candidate, cand);
     return True;
   }
@@ -521,6 +530,7 @@ RIME_DEPRECATED void RimeCandidateListEnd(RimeCandidateListIterator* iterator) {
     return;
   delete[] iterator->candidate.text;
   delete[] iterator->candidate.comment;
+  delete[] iterator->candidate.type;
   memset(iterator, 0, sizeof(RimeCandidateListIterator));
 }
 
