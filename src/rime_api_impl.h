@@ -189,6 +189,14 @@ RIME_DEPRECATED Bool RimeCommitComposition(RimeSessionId session_id) {
   return Bool(session->CommitComposition());
 }
 
+RIME_DEPRECATED Bool RimeCommitCurrentSelection(RimeSessionId session_id,
+                                                const char* append) {
+  an<Session> session(Service::instance().GetSession(session_id));
+  if (!session)
+    return False;
+  return Bool(session->CommitCurrentSelection(append ? append : ""));
+}
+
 RIME_DEPRECATED void RimeClearComposition(RimeSessionId session_id) {
   an<Session> session(Service::instance().GetSession(session_id));
   if (!session)
@@ -1298,6 +1306,7 @@ RIME_API RIME_FLAVORED(RimeApi) * RIME_FLAVORED(rime_get_api)() {
     s_api.cleanup_all_sessions = &RimeCleanupAllSessions;
     s_api.process_key = &RimeProcessKey;
     s_api.commit_composition = &RimeCommitComposition;
+    s_api.commit_current_selection = &RimeCommitCurrentSelection;
     s_api.clear_composition = &RimeClearComposition;
     s_api.get_commit = &RimeGetCommit;
     s_api.free_commit = &RimeFreeCommit;

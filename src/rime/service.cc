@@ -4,6 +4,7 @@
 //
 // 2011-08-08 GONG Chen <chen.sst@gmail.com>
 //
+#include <rime/candidate.h>
 #include <rime/context.h>
 #include <rime/engine.h>
 #include <rime/resource.h>
@@ -40,6 +41,22 @@ bool Session::CommitComposition() {
     return false;
   engine_->context()->Commit();
   return !commit_text_.empty();
+}
+
+bool Session::CommitCurrentSelection(const string& append) {
+  if (!engine_)
+    return false;
+  Context* ctx = engine_->context();
+  if (!ctx || !ctx->IsComposing())
+    return false;
+  // Commit the whole composition's text: already-confirmed segments use
+  // their selected candidate's text, the remaining unconfirmed part falls
+  // back to the raw input (e.g. typing "nihao", confirming "ni" -> "你",
+  // leaving "hao" unselected yields "你hao"), plus the optional appended
+  // string. Nothing else (editor actions, spacing) is applied.
+  engine_->CommitText(ctx->GetCommitText() + append);
+  ctx->Clear();
+  return true;
 }
 
 void Session::ClearComposition() {

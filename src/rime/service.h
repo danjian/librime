@@ -36,7 +36,10 @@ class Session {
   bool ProcessKey(const KeyEvent& key_event);
   void Activate();
   void ResetCommitText();
-  bool CommitComposition();
+bool CommitComposition();
+  // commits the text of the currently selected candidate, optionally with an
+  // appended string, without committing the rest of the composition.
+  bool CommitCurrentSelection(const string& append = "");
   void ClearComposition();
   void ApplySchema(Schema* schema);
 

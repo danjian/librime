@@ -338,6 +338,10 @@ typedef struct RIME_FLAVORED(rime_api_t) {
   Bool (*process_key)(RimeSessionId session_id, int keycode, int mask);
   // return True if there is unread commit text
   Bool (*commit_composition)(RimeSessionId session_id);
+  // commit the currently selected candidate's text, optionally suffixed
+  // with the appended string, without committing the rest of the composition.
+  Bool (*commit_current_selection)(RimeSessionId session_id,
+                                   const char* append);
   void (*clear_composition)(RimeSessionId session_id);
 
   // output

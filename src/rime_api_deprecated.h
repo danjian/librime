@@ -72,6 +72,10 @@ RIME_DEPRECATED Bool RimeProcessKey(RimeSessionId session_id,
  * return True if there is unread commit text
  */
 RIME_DEPRECATED Bool RimeCommitComposition(RimeSessionId session_id);
+/*! \deprecated commit the currently selected candidate's text, optionally
+ *  suffixed with the appended string. */
+RIME_DEPRECATED Bool RimeCommitCurrentSelection(RimeSessionId session_id,
+                                                const char* append);
 RIME_DEPRECATED void RimeClearComposition(RimeSessionId session_id);
 
 // Output
