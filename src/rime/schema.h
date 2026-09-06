@@ -31,6 +31,7 @@ class Schema {
   const string& schema_name() const { return schema_name_; }
   const string& layout() const { return layout_; }
   const string& punctuation() const { return punctuation_; }
+  const string& kind() const { return kind_; }
 
   Config* config() const { return config_.get(); }
   void set_config(Config* config) { config_.reset(config); }
@@ -51,6 +52,7 @@ class Schema {
   string schema_name_;
   string layout_;
   string punctuation_;
+  string kind_;
   the<Config> config_;
   // frequently used config items
   int page_size_ = 5;

@@ -35,6 +35,9 @@ void Schema::FetchUsefulConfigItems() {
   if (!config_->GetString("schema/punctuation", &punctuation_)) {
     punctuation_ = "";
   }
+  if (!config_->GetString("schema/kind", &kind_)) {
+    kind_ = "";
+  }
   config_->GetInt("menu/page_size", &page_size_);
   if (page_size_ < 1) {
     page_size_ = 5;
